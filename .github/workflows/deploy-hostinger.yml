@@ -1,0 +1,88 @@
+name: Deploy Entheotiki Globe to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Generate index.html for static SPA
+        run: |
+          # Extract hashed filenames from build output
+          CSS_FILE=$(ls build/client/assets/index-*.css | head -1 | xargs basename)
+          ENTRY_FILE=$(ls build/client/assets/entry.client-*.js | head -1 | xargs basename)
+          MANIFEST_FILE=$(ls build/client/assets/manifest-*.js | head -1 | xargs basename)
+          
+          cat > build/client/index.html << EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Entheogen Stewardship Project</title>
+            <link rel="icon" type="image/x-icon" href="/favicon.ico">
+            <link rel="stylesheet" href="/assets/$CSS_FILE">
+          </head>
+          <body>
+            <div id="root"></div>
+            <script type="module" src="/assets/$ENTRY_FILE"></script>
+          </body>
+          </html>
+          EOF
+          
+          echo "Generated index.html with:"
+          echo "  CSS: $CSS_FILE"
+          echo "  Entry JS: $ENTRY_FILE"
+
+      - name: Package deployment
+        run: |
+          tar \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude=static \
+            --exclude=README.md \
+            -czf entheotiki-release.tar.gz .
+
+      - name: Upload to Hostinger VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          source: "entheotiki-release.tar.gz"
+          target: "${{ secrets.HOSTINGER_APP_DIR }}"
+
+      - name: Install and restart app on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          script: |
+            cd "${{ secrets.HOSTINGER_APP_DIR }}"
+            tar -xzf entheotiki-release.tar.gz
+            npm ci --omit=dev
+            pm2 restart entheotiki || pm2 start npm --name entheotiki -- run start
+            pm2 save
