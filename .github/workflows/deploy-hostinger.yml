@@ -24,34 +24,8 @@ jobs:
       - name: Build app
         run: npm run build
 
-      - name: Generate index.html with Remix context and manifest
-        run: |
-          CSS_FILE=$(ls build/client/assets/index-*.css | head -1 | xargs basename)
-          ENTRY_FILE=$(ls build/client/assets/entry.client-*.js | head -1 | xargs basename)
-          MANIFEST_FILE=$(ls build/client/assets/manifest-*.js | head -1 | xargs basename)
-          ROUTE_FILE=$(ls build/client/assets/route-*.js | head -1 | xargs basename)
-          ROOT_FILE=$(ls build/client/assets/root-*.js | head -1 | xargs basename)
-          MAIN_FILE=$(ls build/client/assets/index-*.js | head -1 | xargs basename)
-
-          cat > build/client/index.html << HTMLEOF
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entheogen Stewardship Project</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="stylesheet" href="/assets/$CSS_FILE">
-</head>
-<body>
-  <div id="root"></div>
-  <script>window.__remixContext={"basename":"/","future":{"v3_fetcherPersist":false,"v3_relativeSplatPath":false,"v3_throwAbortReason":false,"v3_singleFetch":false,"v3_lazyRouteDiscovery":false,"unstable_optimizeDates":false},"isSpaMode":true,"state":{"loaderData":{"root":null,"routes/home/route":null},"actionData":null,"errors":null}};</script>
-  <script src="/assets/$MANIFEST_FILE"></script>
-  <script type="module" src="/assets/$ENTRY_FILE"></script>
-</body>
-</html>
-HTMLEOF
-          echo "Generated index.html with manifest $MANIFEST_FILE"
+      - name: Generate index.html
+        run: python3 generate-index.py
 
       - name: Upload to Hostinger VPS
         uses: appleboy/scp-action@v0.1.7
