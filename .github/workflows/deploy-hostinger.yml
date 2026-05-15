@@ -8,7 +8,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -25,14 +24,14 @@ jobs:
       - name: Build app
         run: npm run build
 
-      - name: Generate index.html for static SPA
+      - name: Generate index.html with Remix context
         run: |
-          # Extract hashed filenames from build output
           CSS_FILE=$(ls build/client/assets/index-*.css | head -1 | xargs basename)
           ENTRY_FILE=$(ls build/client/assets/entry.client-*.js | head -1 | xargs basename)
-          MANIFEST_FILE=$(ls build/client/assets/manifest-*.js | head -1 | xargs basename)
-          
-          cat > build/client/index.html << EOF
+          ROUTE_FILE=$(ls build/client/assets/route-*.js | head -1 | xargs basename)
+          ROOT_FILE=$(ls build/client/assets/root-*.js | head -1 | xargs basename)
+
+          cat > build/client/index.html << HTMLEOF
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -44,35 +43,13 @@ jobs:
           </head>
           <body>
             <div id="root"></div>
+            <script>window.__remixContext = {"basename":"/","future":{"v3_fetcherPersist":false,"v3_relativeSplatPath":false,"v3_throwAbortReason":false,"v3_singleFetch":false,"v3_lazyRouteDiscovery":false,"unstable_optimizeDates":false},"isSpaMode":true,"state":{"loaderData":{"root":null,"routes/home/route":null},"actionData":null,"errors":null}};</script>
             <script type="module" src="/assets/$ENTRY_FILE"></script>
           </body>
           </html>
-          EOF
-          
-          echo "Generated index.html with:"
-          echo "  CSS: $CSS_FILE"
-          echo "  Entry JS: $ENTRY_FILE"
+          HTMLEOF
+          echo "Generated index.html with Remix SPA context"
 
-      - name: Package deployment
-        run: |
-          mkdir -p dist
-          tar \
-            --exclude=node_modules \
-            --exclude=.git \
-            --exclude=.github \
-            --exclude=.gitignore \
-            --exclude=.env \
-            --exclude=*.tar.gz \
-            --exclude=dist \
-            -czf dist/entheotiki-release.tar.gz build/ package.json package-lock.json
-
-   - name: Debug SSH connection
-  run: |
-    echo "Testing SSH connection..."
-    mkdir -p ~/.ssh
-    echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/hostinger_key
-    chmod 600 ~/.ssh/hostinger_key
-    ssh -vvv -i ~/.ssh/hostinger_key -o StrictHostKeyChecking=no -p ${{ secrets.HOSTINGER_PORT }} ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "echo 'SSH works!' && pwd"
       - name: Upload to Hostinger VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -80,10 +57,10 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "dist/entheotiki-release.tar.gz"
+          source: "build/client,server.js,package.json,package-lock.json"
           target: "${{ secrets.HOSTINGER_APP_DIR }}"
 
-      - name: Install and restart app on VPS
+      - name: Install and restart on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -91,8 +68,7 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            cd "${{ secrets.HOSTINGER_APP_DIR }}"
-            tar -xzf entheotiki-release.tar.gz
-            npm ci --omit=dev
-            pm2 restart entheotiki || pm2 start npm --name entheotiki -- run start
+            cd ${{ secrets.HOSTINGER_APP_DIR }}
+            npm install --omit=dev
+            pm2 restart entheotiki || pm2 start server.js --name entheotiki
             pm2 save
