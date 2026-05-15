@@ -53,8 +53,8 @@ jobs:
           echo "  CSS: $CSS_FILE"
           echo "  Entry JS: $ENTRY_FILE"
 
-     - name: Package deployment
-  run: |
+      - name: Package deployment
+        run: |
     mkdir -p dist
     tar \
       --exclude=node_modules \
