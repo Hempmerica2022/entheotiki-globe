@@ -66,11 +66,13 @@ jobs:
             --exclude=dist \
             -czf dist/entheotiki-release.tar.gz build/ package.json package-lock.json
 
-      - name: Debug SSH connection
-        run: |
-          echo "Testing SSH connection..."
-          ssh -vvv -i /tmp/key.pem -o StrictHostKeyChecking=no ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} -p ${{ secrets.HOSTINGER_PORT }} "echo 'SSH works!' && pwd"
-
+   - name: Debug SSH connection
+  run: |
+    echo "Testing SSH connection..."
+    mkdir -p ~/.ssh
+    echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/hostinger_key
+    chmod 600 ~/.ssh/hostinger_key
+    ssh -vvv -i ~/.ssh/hostinger_key -o StrictHostKeyChecking=no -p ${{ secrets.HOSTINGER_PORT }} ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "echo 'SSH works!' && pwd"
       - name: Upload to Hostinger VPS
         uses: appleboy/scp-action@v0.1.7
         with:
