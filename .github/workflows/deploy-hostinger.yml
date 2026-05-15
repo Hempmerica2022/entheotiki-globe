@@ -27,6 +27,17 @@ jobs:
       - name: Generate index.html
         run: python3 generate-index.py
 
+      - name: Create clean tarball
+        run: |
+          tar czf /tmp/deploy.tar.gz \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude=node_modules \
+            --exclude=static \
+            --exclude=README.md \
+            --exclude=DEPLOY.md \
+            .
+
       - name: Upload to Hostinger VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -34,11 +45,10 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "."
-          target: "${{ secrets.HOSTINGER_APP_DIR }}"
-          overwrite: true
+          source: "/tmp/deploy.tar.gz"
+          target: "/tmp/"
 
-      - name: Install and restart on VPS
+      - name: Extract and restart on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -48,6 +58,8 @@ jobs:
           script: |
             export PATH="/root/.nvm/versions/node/v20.20.2/bin:$PATH"
             cd ${{ secrets.HOSTINGER_APP_DIR }}
+            tar xzf /tmp/deploy.tar.gz
+            rm /tmp/deploy.tar.gz
             npm install --omit=dev
             pm2 restart entheotiki || pm2 start server.js --name entheotiki
             pm2 save
