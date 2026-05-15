@@ -73,7 +73,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "entheotiki-release.tar.gz"
+          source: "dist/entheotiki-release.tar.gz"
           target: "${{ secrets.HOSTINGER_APP_DIR }}"
 
       - name: Install and restart app on VPS
