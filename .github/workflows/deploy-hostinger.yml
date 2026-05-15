@@ -32,10 +32,12 @@ jobs:
           tar czf /tmp/deploy.tar.gz \
             --exclude=.git \
             --exclude=.github \
+            --exclude=.wrangler \
             --exclude=node_modules \
             --exclude=static \
             --exclude=README.md \
             --exclude=DEPLOY.md \
+            --exclude=Agent \
             .
 
       - name: Upload to Hostinger VPS
@@ -59,9 +61,11 @@ jobs:
             NODE=/root/.nvm/versions/node/v20.20.2/bin/node
             NPM=/root/.nvm/versions/node/v20.20.2/bin/npm
             PM2=/root/.nvm/versions/node/v20.20.2/bin/pm2
-            cd ${{ secrets.HOSTINGER_APP_DIR }}
+            APP_DIR=${{ secrets.HOSTINGER_APP_DIR }}
+            cd $APP_DIR
+            $PM2 delete entheotiki 2>/dev/null || true
             tar xzf /tmp/deploy.tar.gz
             rm /tmp/deploy.tar.gz
             $NPM install --omit=dev
-            $PM2 restart entheotiki || $PM2 start server.js --name entheotiki
+            $PM2 start server.js --name entheotiki
             $PM2 save
