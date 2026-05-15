@@ -55,17 +55,18 @@ jobs:
 
       - name: Package deployment
         run: |
-    mkdir -p dist
-    tar \
-      --exclude=node_modules \
-      --exclude=.git \
-      --exclude=.github \
-      --exclude=.gitignore \
-      --exclude=.env \
-      --exclude=*.tar.gz \
-      --exclude=dist \
-      -czf dist/entheotiki-release.tar.gz build/ package.json package-lock.json
-
+      - name: Package deployment
+        run: |
+          mkdir -p dist
+          tar \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=.github \
+            --exclude=.gitignore \
+            --exclude=.env \
+            --exclude=*.tar.gz \
+            --exclude=dist \
+            -czf dist/entheotiki-release.tar.gz build/ package.json package-lock.json
       - name: Upload to Hostinger VPS
         uses: appleboy/scp-action@v0.1.7
         with:
