@@ -12,10 +12,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Use Node 20
+      - name: Use Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -28,9 +28,6 @@ jobs:
         run: |
           CSS_FILE=$(ls build/client/assets/index-*.css | head -1 | xargs basename)
           ENTRY_FILE=$(ls build/client/assets/entry.client-*.js | head -1 | xargs basename)
-          ROUTE_FILE=$(ls build/client/assets/route-*.js | head -1 | xargs basename)
-          ROOT_FILE=$(ls build/client/assets/root-*.js | head -1 | xargs basename)
-
           cat > build/client/index.html << HTMLEOF
           <!DOCTYPE html>
           <html lang="en">
@@ -57,7 +54,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "build/client,server.js,package.json,package-lock.json"
+          source: "."
           target: "${{ secrets.HOSTINGER_APP_DIR }}"
 
       - name: Install and restart on VPS
