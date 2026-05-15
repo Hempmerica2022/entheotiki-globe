@@ -35,6 +35,8 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           source: "."
+          overwrite: true
+          overwrite: true
           target: "${{ secrets.HOSTINGER_APP_DIR }}"
 
       - name: Install and restart on VPS
