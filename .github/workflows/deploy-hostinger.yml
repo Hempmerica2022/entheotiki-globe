@@ -18,7 +18,12 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          - name: Debug SSH connection
+          echo "Testing SSH connection..."
+          ssh -vvv -i /tmp/key.pem -o StrictHostKeyChecking=no ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} -p ${{ secrets.HOSTINGER_PORT }} "echo 'SSH works!' && pwd"
 
+  run: |
+             
       - name: Install dependencies
         run: npm ci
 
