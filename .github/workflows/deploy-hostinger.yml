@@ -56,10 +56,12 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            export PATH="/root/.nvm/versions/node/v20.20.2/bin:$PATH"
+            NODE=/root/.nvm/versions/node/v20.20.2/bin/node
+            NPM=/root/.nvm/versions/node/v20.20.2/bin/npm
+            PM2=/root/.nvm/versions/node/v20.20.2/bin/pm2
             cd ${{ secrets.HOSTINGER_APP_DIR }}
             tar xzf /tmp/deploy.tar.gz
             rm /tmp/deploy.tar.gz
-            npm install --omit=dev
-            pm2 restart entheotiki || pm2 start server.js --name entheotiki
-            pm2 save
+            $NPM install --omit=dev
+            $PM2 restart entheotiki || $PM2 start server.js --name entheotiki
+            $PM2 save
