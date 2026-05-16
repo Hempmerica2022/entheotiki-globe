@@ -27,7 +27,16 @@ jobs:
       - name: Generate index.html
         run: python3 generate-index.py
 
-      - name: Create tarball in workspace
+      - name: Debug directory
+        run: |
+          echo "=== PWD ==="
+          pwd
+          echo "=== LS ==="
+          ls -la
+          echo "=== FIND ==="
+          find . -maxdepth 2 -not -path "./.git/*" -not -path "./node_modules/*" | head -30
+
+      - name: Create tarball
         run: |
           tar czf deploy.tar.gz \
             --exclude=.git \
@@ -41,7 +50,10 @@ jobs:
             .
 
       - name: Verify tarball
-        run: ls -lh deploy.tar.gz && tar tzf deploy.tar.gz | wc -l
+        run: |
+          ls -lh deploy.tar.gz
+          tar tzf deploy.tar.gz | wc -l
+          tar tzf deploy.tar.gz | head -20
 
       - name: Upload to Hostinger VPS
         uses: appleboy/scp-action@v0.1.7
