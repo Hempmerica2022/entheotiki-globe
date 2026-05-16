@@ -27,6 +27,12 @@ jobs:
       - name: Generate index.html
         run: python3 generate-index.py
 
+      - name: Debug workspace
+        run: |
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "PWD=$(pwd)"
+          ls -la
+
       - name: Create clean tarball
         run: |
           tar czf /tmp/deploy.tar.gz \
@@ -39,6 +45,11 @@ jobs:
             --exclude=DEPLOY.md \
             --exclude=Agent \
             .
+
+      - name: Verify tarball
+        run: |
+          ls -lh /tmp/deploy.tar.gz
+          tar tzf /tmp/deploy.tar.gz | wc -l
 
       - name: Upload to Hostinger VPS
         uses: appleboy/scp-action@v0.1.7
