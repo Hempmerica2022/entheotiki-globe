@@ -56,8 +56,13 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            source ~/.bashrc # Source bashrc to load nvm
-            cd ${{ secrets.HOSTINGER_APP_DIR }}
-            npm install --omit=dev
-            pm2 restart entheotiki || pm2 start server.js --name entheotiki
-            pm2 save
+            # Use full path to node, npm, pm2
+            NODE=/root/.nvm/versions/node/v20.20.2/bin/node
+            NPM=/root/.nvm/versions/node/v20.20.2/bin/npm
+            PM2=/root/.nvm/versions/node/v20.20.2/bin/pm2
+            APP_DIR="${{ secrets.HOSTINGER_APP_DIR }}"
+            cd "$APP_DIR"
+            $PM2 delete entheotiki 2>/dev/null || true
+            $NPM install --omit=dev
+            $PM2 start server.js --name entheotiki
+            $PM2 save
