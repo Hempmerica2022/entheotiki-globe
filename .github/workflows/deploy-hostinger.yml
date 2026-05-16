@@ -56,13 +56,21 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            # Use full path to node, npm, pm2
-            NODE=/root/.nvm/versions/node/v20.20.2/bin/node
-            NPM=/root/.nvm/versions/node/v20.20.2/bin/npm
-            PM2=/root/.nvm/versions/node/v20.20.2/bin/pm2
+            # Ensure correct ownership and PATH
+            sudo chown -R u858721991:u858721991 ${{ secrets.HOSTINGER_APP_DIR }}
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            NODE="$(command -v node)"
+            NPM="$(command -v npm)"
+            PM2="$(command -v pm2)"
+
+            echo "Using Node: $($NODE -v)"
+            echo "Using NPM: $($NPM -v)"
+
             APP_DIR="${{ secrets.HOSTINGER_APP_DIR }}"
             cd "$APP_DIR"
             $PM2 delete entheotiki 2>/dev/null || true
             $NPM install --omit=dev
-            $PM2 start server.js --name entheotiki
-            $PM2 save
+            pm2 restart entheotiki || pm2 start server.js --name entheotiki
+            pm2 save
