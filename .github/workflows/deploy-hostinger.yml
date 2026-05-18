@@ -68,13 +68,12 @@ jobs:
 
               cd "$RELEASE_DIR"
 
-           npm ci
-           npm install pm2
+              npm ci
+              npm install pm2
 
-           ln -sfn "$RELEASE_DIR" "$APP_ROOT/current"
+              ln -sfn "$RELEASE_DIR" "$APP_ROOT/current"
 
-           cd "$APP_ROOT/current"
-
-         ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
-         ./node_modules/.bin/pm2 save
+              cd "$APP_ROOT/current"
+              ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
+              ./node_modules/.bin/pm2 save
           EOF
