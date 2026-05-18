@@ -49,30 +49,30 @@ jobs:
             release.tar.gz \
             ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/reed/apps/entheotiki/release.tar.gz
             
-      - name: Activate release on VPS
+            - name: Activate release on VPS
         run: |
           ssh -p ${{ secrets.HOSTINGER_PORT }} \
             -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
-            ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} << 'EOF'
-              set -e
+            ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} \
+            'set -e
+            APP_ROOT="/home/reed/apps/entheotiki"
+            RELEASE_ID="$(date +%Y%m%d%H%M%S)"
+            RELEASE_DIR="$APP_ROOT/releases/$RELEASE_ID"
 
-              APP_ROOT="/home/reed/apps/entheotiki"
-              RELEASE_ID="$(date +%Y%m%d%H%M%S)"
-              RELEASE_DIR="$APP_ROOT/releases/$RELEASE_ID"
+            mkdir -p "$APP_ROOT/releases"
+            mkdir -p "$RELEASE_DIR"
 
-              mkdir -p "$APP_ROOT/releases"
-              mkdir -p "$RELEASE_DIR"
+            tar -xzf "$APP_ROOT/release.tar.gz" -C "$RELEASE_DIR"
 
-              tar -xzf "$APP_ROOT/release.tar.gz" -C "$RELEASE_DIR"
+            cd "$RELEASE_DIR"
 
-              cd "$RELEASE_DIR"
+            npm ci
+            npm install pm2
 
-              npm ci
-              npm install pm2
+            ln -sfn "$RELEASE_DIR" "$APP_ROOT/current"
 
-              ln -sfn "$RELEASE_DIR" "$APP_ROOT/current"
+            cd "$APP_ROOT/current"
 
-              cd "$APP_ROOT/current"
-              ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
-              ./node_modules/.bin/pm2 save
+            ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
+            ./node_modules/.bin/pm2 save'
