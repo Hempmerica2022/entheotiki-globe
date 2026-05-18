@@ -3,7 +3,21 @@ import * as THREE from 'three';
 import { useEffect, useRef, useState } from 'react';
 
 import App from './app';
-import Globe from './globe';
+import { useEffect, useState } from "react";
+
+export default function GlobeWrapper() {
+  const [GlobeComponent, setGlobeComponent] = useState(null);
+
+  useEffect(() => {
+import("~/components/globe/app").then((mod) => {
+      setGlobeComponent(() => mod.default);
+    });
+  }, []);
+
+  if (!GlobeComponent) return null;
+
+  return <GlobeComponent />;
+}
 import Lines from './lines';
 import Marker from './marker';
 import Markers from './markers';
