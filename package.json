@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@csstools/postcss-global-data": "^3.0.0",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "@remix-run/cloudflare": "^2.15.2",
     "@remix-run/node": "^2.13.1",
     "@remix-run/react": "^2.15.0",
@@ -20,12 +22,14 @@
     "chroma-js": "^3.1.2",
     "d3": "^7.9.0",
     "dat.gui": "^0.7.9",
+    "express": "^4.21.0",
     "fabric": "^4.5.1",
     "framer-motion": "^11.11.9",
     "isbot": "^4.1.0",
     "perlin-noise": "^0.0.1",
     "postcss-custom-media": "^11.0.4",
     "prop-types": "^15.8.1",
+    "r3f-globe": "^1.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rehype-img-size": "^1.0.1",
@@ -36,8 +40,7 @@
     "three-orbitcontrols": "^2.110.3",
     "three-stdlib": "^2.33.0",
     "three.meshline": "^1.4.0",
-    "tween.js": "^16.6.0",
-    "express": "^4.21.0"
+    "tween.js": "^16.6.0"
   },
   "devDependencies": {
     "@mapbox/rehype-prism": "^0.9.0",

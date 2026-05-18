@@ -1,7 +1,7 @@
 import glob, os
 
 assets = "build/client/assets"
-css = os.path.basename(glob.glob(assets + "/index-*.css")[0])
+css = os.path.basename(glob.glob(assets + "/main-*.css")[0])
 entry = os.path.basename(glob.glob(assets + "/entry.client-*.js")[0])
 manifest = os.path.basename(glob.glob(assets + "/manifest-*.js")[0])
 
