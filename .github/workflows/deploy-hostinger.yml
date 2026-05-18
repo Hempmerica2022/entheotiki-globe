@@ -57,6 +57,7 @@ jobs:
               npm ci
               npm run build
 
-              sudo /usr/local/bin/pm2 restart entheotiki --update-env || sudo /usr/local/bin/pm2 start npm --name entheotiki -- run start
-              sudo /usr/local/bin/pm2 save
+              npm install pm2 --save-dev
+              ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
+              ./node_modules/.bin/pm2 save
           EOF
