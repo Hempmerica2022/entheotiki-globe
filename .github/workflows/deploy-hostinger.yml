@@ -27,50 +27,28 @@ jobs:
       - name: Generate index.html
         run: python3 generate-index.py
 
-      - name: Setup SSH
+      - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.HOSTINGER_PORT }} -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p ${{ secrets.HOSTINGER_PORT }} -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
 
       - name: Rsync to VPS
         run: |
           rsync -avz --delete \
+            -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             --exclude=.git \
             --exclude=.github \
-            --exclude=.wrangler \
             --exclude=node_modules \
-            --exclude=static \
-            --exclude=README.md \
-            --exclude=DEPLOY.md \
-            --exclude=Agent \
-            -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_DIR }}/
 
-      - name: Install and restart on VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_PORT }}
-          script: |
-            # Ensure correct ownership and PATH
-            sudo chown -R u858721991:u858721991 ${{ secrets.HOSTINGER_APP_DIR }}
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            
-            NODE="$(command -v node)"
-            NPM="$(command -v npm)"
-            PM2="$(command -v pm2)"
-
-            echo "Using Node: $($NODE -v)"
-            echo "Using NPM: $($NPM -v)"
-
-            APP_DIR="${{ secrets.HOSTINGER_APP_DIR }}"
-            cd "$APP_DIR"
-            $PM2 delete entheotiki 2>/dev/null || true
-            $NPM install --omit=dev
+      - name: Finalize on VPS
+        run: |
+          ssh -p ${{ secrets.HOSTINGER_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} << "EOF"
+            export PATH="/root/.nvm/versions/node/v20.20.2/bin:$PATH"
+            cd ${{ secrets.HOSTINGER_APP_DIR }}
+            npm install --omit=dev
             pm2 restart entheotiki || pm2 start server.js --name entheotiki
             pm2 save
+          EOF
