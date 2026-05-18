@@ -19,22 +19,22 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-    run: |
-     export NVM_DIR="$HOME/.nvm"
-     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-     nvm use 20
-     node -v
-     npm -v
-     npm ci
+     run: |
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      nvm use 20
+      node -v
+      npm -v
+      npm ci
  
-     - name: Build app
-   run: |
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-    nvm use 20
+      - name: Build app
+     run: |
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      nvm use 20
 
-    node -v
-    npm run build
+      node -v
+      npm run build
 
       - name: Generate index.html
         run: python3 generate-index.py
