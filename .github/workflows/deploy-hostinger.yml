@@ -57,6 +57,7 @@ jobs:
               npm ci
               npm run build
 
+              npm install -g pm2
               pm2 restart entheotiki --update-env || pm2 start npm --name entheotiki -- run start
               pm2 save
           EOF
