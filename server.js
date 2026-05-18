@@ -1,6 +1,7 @@
+import { createRequestHandler } from "@remix-run/express";
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -8,14 +9,26 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static assets from the Vite/Remix client build
-app.use(express.static(path.join(__dirname, "build/client")));
+app.use(
+  "/assets",
+  express.static(path.join(__dirname, "build/client/assets"), {
+    immutable: true,
+    maxAge: "1y",
+  })
+);
 
-// Fallback: always serve index.html for any route (SPA behavior)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build/client/index.html"));
-});
+app.use(express.static(path.join(__dirname, "build/client"), { maxAge: "1h" }));
 
-app.listen(port, () => {
-  console.log(`Entheotiki globe app running on port ${port}`);
+const build = await import("./build/server/index.js");
+
+app.all(
+  "*",
+  createRequestHandler({
+    build,
+    mode: process.env.NODE_ENV,
+  })
+);
+
+app.listen(port, "127.0.0.1", () => {
+  console.log(`Entheotiki Remix app listening on http://127.0.0.1:${port}`);
 });
