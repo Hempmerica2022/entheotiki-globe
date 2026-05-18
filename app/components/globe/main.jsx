@@ -3,21 +3,7 @@ import * as THREE from 'three';
 import { useEffect, useRef, useState } from 'react';
 
 import App from './app';
-import { useEffect, useState } from "react";
-
-export default function GlobeWrapper() {
-  const [GlobeComponent, setGlobeComponent] = useState(null);
-
-  useEffect(() => {
-import("~/components/globe/app").then((mod) => {
-      setGlobeComponent(() => mod.default);
-    });
-  }, []);
-
-  if (!GlobeComponent) return null;
-
-  return <GlobeComponent />;
-}
+import Globe from './globe';
 import Lines from './lines';
 import Marker from './marker';
 import Markers from './markers';
@@ -31,7 +17,6 @@ import { getCountries } from '~/components/globe/data/processing';
 import { config, elements, groups, animations } from '~/components/globe/utils/config';
 
 import styles from './main.module.css';
-
 
 const Main = () => {
     const [controls, setControls] = useState({ changed: true });
@@ -65,11 +50,8 @@ const Main = () => {
 
             setData(loadedData);
 
-            // Charger toutes les textures du globe AVANT de faire le setup
             globeRef.current = new Globe();
             await globeRef.current.loadTextures();
-
-            //await new Promise(resolve => setTimeout(resolve, 3000));
 
             setIsLoading(false);
             return true;
@@ -83,39 +65,10 @@ const Main = () => {
 
     const setup = (app) => {
         const controllers = [];
-        // Panneau de configuration décommenter pour activer le panneau de configuration.
-        {/* app.addControlGui(gui => {
-            const colorFolder = gui.addFolder('Colors');
-            controllers.push(colorFolder.addColor(config.colors, 'globeDotColor'));
-            controllers.push(colorFolder.addColor(config.colors, 'globeMarkerColor'));
-            controllers.push(colorFolder.addColor(config.colors, 'globeMarkerGlow'));
-            controllers.push(colorFolder.addColor(config.colors, 'globeLines'));
-            controllers.push(colorFolder.addColor(config.colors, 'globeLinesDots'));
-
-            const sizeFolder = gui.addFolder('Sizes');
-            controllers.push(sizeFolder.add(config.sizes, 'globeDotSize', 1, 5));
-            controllers.push(sizeFolder.add(config.scale, 'globeScale', 0.1, 1));
-
-            const displayFolder = gui.addFolder('Display');
-            controllers.push(displayFolder.add(config.display, 'map'));
-            controllers.push(displayFolder.add(config.display, 'lines'));
-            controllers.push(displayFolder.add(config.display, 'lineDots'));
-            controllers.push(displayFolder.add(config.display, 'points'));
-            controllers.push(displayFolder.add(config.display, 'markers'));
-            controllers.push(displayFolder.add(config.display, 'markerLabel'));
-            controllers.push(displayFolder.add(config.display, 'markerPoint'));
-            controllers.push(displayFolder.add(config.display, 'atmosphere'));
-
-            const animationsFolder = gui.addFolder('Animations');
-            controllers.push(animationsFolder.add(animations, 'rotateGlobe'));
-
-            sizeFolder.open();
-        }); */}
 
         controllers.forEach(controller => {
             controller.onChange(() => {
                 setControls(prevControls => ({ ...prevControls, changed: true }));
-
             });
         });
 
@@ -125,7 +78,6 @@ const Main = () => {
         groups.globe = new THREE.Group();
         groups.globe.name = 'Globe';
 
-        // ⚠️ Injecter les objets 3D une fois les textures chargées
         if (globeRef.current) {
             globeRef.current.setup(app.scene);
         }
@@ -276,11 +228,6 @@ const Main = () => {
                     <p className={styles.loaderMessage}>Loading ...</p>
                 </div>
             )}
-            <Globe
-                scene={appRef.current?.scene}
-                setIsLoading={setIsLoading}
-                loader={new THREE.TextureLoader()}
-            />
             <ul className="markers"></ul>
         </div>
     );
