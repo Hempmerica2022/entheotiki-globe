@@ -36,13 +36,13 @@ jobs:
 
       - name: Rsync to VPS
         run: |
-          rsync -avz --delete \
-            -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
-            --exclude=.git \
-            --exclude=.github \
-            --exclude=node_modules \
-            ./ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_DIR }}/
-
+          rsync -rlvz --delete --no-times --omit-dir-times \
+          -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+          --exclude=.git \
+          --exclude=.github \
+          --exclude=node_modules \
+          ./ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_DIR }}/
+            
       - name: Finalize on VPS
         run: |
           ssh -p ${{ secrets.HOSTINGER_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} << "EOF"
