@@ -22,9 +22,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build app
-        run: npm run build
-
       - name: Package release
         run: |
          tar -czf release.tar.gz \
@@ -33,7 +30,6 @@ jobs:
          server.js \
          vite.config.js \
          app \
-         build \
          public \
          static
 
@@ -57,24 +53,25 @@ jobs:
             -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} \
-            'set -e
-            APP_ROOT="/home/reed/apps/entheotiki"
-            RELEASE_ID="$(date +%Y%m%d%H%M%S)"
-            RELEASE_DIR="$APP_ROOT/releases/$RELEASE_ID"
+            "set -e
+            APP_ROOT=\"/home/reed/apps/entheotiki\"
+            RELEASE_ID=\"\$(date +%Y%m%d%H%M%S)\"
+            RELEASE_DIR=\"\$APP_ROOT/releases/\$RELEASE_ID\"
 
-            mkdir -p "$APP_ROOT/releases"
-            mkdir -p "$RELEASE_DIR"
+            mkdir -p \"\$APP_ROOT/releases\"
+            mkdir -p \"\$RELEASE_DIR\"
 
-            tar -xzf "$APP_ROOT/release.tar.gz" -C "$RELEASE_DIR"
+            tar -xzf \"\$APP_ROOT/release.tar.gz\" -C \"\$RELEASE_DIR\"
 
-            cd "$RELEASE_DIR"
+            cd \"\$RELEASE_DIR\"
 
             npm ci
+            npm run build
             npm install pm2
 
-            ln -sfn "$RELEASE_DIR" "$APP_ROOT/current"
+            ln -sfn \"\$RELEASE_DIR\" \"\$APP_ROOT/current\"
 
-            cd "$APP_ROOT/current"
+            cd \"\$APP_ROOT/current\"
 
             ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
-            ./node_modules/.bin/pm2 save' 
+            ./node_modules/.bin/pm2 save"
