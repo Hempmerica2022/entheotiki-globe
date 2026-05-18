@@ -25,7 +25,7 @@ app.all(
   "*",
   createRequestHandler({
     build,
-    mode: process.env.NODE_ENV,
+    mode: process.env.NODE_ENV || "production",
   })
 );
 
