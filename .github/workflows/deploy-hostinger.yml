@@ -27,13 +27,15 @@ jobs:
 
       - name: Package release
         run: |
-          tar -czf release.tar.gz \
-            package.json \
-            package-lock.json \
-            server.js \
-            build \
-            public \
-            static
+         tar -czf release.tar.gz \
+         package.json \
+         package-lock.json \
+         server.js \
+         vite.config.js \
+         app \
+         build \
+         public \
+         static
 
       - name: Prepare SSH key
         run: |
