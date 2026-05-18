@@ -76,4 +76,3 @@ jobs:
               cd "$APP_ROOT/current"
               ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
               ./node_modules/.bin/pm2 save
-            EOF
