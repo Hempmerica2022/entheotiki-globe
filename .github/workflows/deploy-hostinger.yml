@@ -49,7 +49,7 @@ jobs:
             release.tar.gz \
             ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/reed/apps/entheotiki/release.tar.gz
             
-            - name: Activate release on VPS
+      - name: Activate release on VPS
         run: |
           ssh -p ${{ secrets.HOSTINGER_PORT }} \
             -i ~/.ssh/deploy_key \
@@ -75,4 +75,4 @@ jobs:
             cd "$APP_ROOT/current"
 
             ./node_modules/.bin/pm2 restart entheotiki --update-env || ./node_modules/.bin/pm2 start npm --name entheotiki -- run start
-            ./node_modules/.bin/pm2 save'
+            ./node_modules/.bin/pm2 save' 
